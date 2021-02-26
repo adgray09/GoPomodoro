@@ -44,10 +44,6 @@ func alarm() {
 	<-done
 }
 
-func timerDuration(d time.Duration) time.Duration {
-	return d * time.Minute
-}
-
 func createTimer(timerDuration time.Duration, action func()) *time.Timer {
 	timer := time.NewTimer(timerDuration)
 
@@ -69,12 +65,4 @@ func startTimer(timerDuration time.Duration) {
 	killTimer := (time.Duration(timerDuration) + time.Second)
 	countdownBeforeExit := time.NewTimer(time.Second * killTimer)
 	<-countdownBeforeExit.C
-}
-
-func minuteToSeconds(timeDuration time.Duration) int {
-
-	convertedTime := int(timeDuration / time.Second)
-
-	return convertedTime
-
 }
