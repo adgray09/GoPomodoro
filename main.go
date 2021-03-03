@@ -12,19 +12,64 @@ import (
 	"github.com/faiface/beep/speaker"
 )
 
-func main() {
+type flags struct {
+	isUsed bool
+}
 
-	workDuration := flag.Duration("work", 25*time.Minute, "Work duration - default: 25 minutes")
+func main() {
+	flagHandler()
+}
+
+func flagHandler() {
+	var userAlarm string
+
+	flag.StringVar(&userAlarm, "alarm", "alarm1", "Choices: alarm1, alarm2")
+	timerDuration := flag.Duration("work", 25*time.Minute, "Work duration - default: 25 minutes")
 	breakDuration := flag.Duration("break", 5*time.Minute, "Break duration - default: 5 minutes")
 	flag.Parse()
 
-	workTimer(*workDuration)
-	breakTimer(*breakDuration)
+	firstFlag := flags{isFlagPassed("work")}
+	secondFlag := flags{isFlagPassed("break")}
 
+	userAlarm = chooseAlarm(userAlarm)
+
+	if firstFlag.isUsed {
+		fmt.Println("Starting work")
+		workTimer(*timerDuration, userAlarm)
+	}
+
+	if secondFlag.isUsed {
+		fmt.Println("Starting break")
+		breakTimer(*breakDuration, userAlarm)
+	}
 }
 
-func alarm() {
-	f, err := os.Open("./assets/alarms/Alarm.mp3")
+func isFlagPassed(name string) bool {
+	found := false
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == name {
+			found = true
+		}
+	})
+	return found
+}
+
+func chooseAlarm(userChoice string) string {
+	var theAlarm string
+
+	alarms := map[string]string{
+		"alarm1": "./assets/alarms/Alarm.mp3",
+		"alarm2": "./assets/alarms/Alarm2.mp3",
+	}
+
+	if key, ok := alarms[userChoice]; ok {
+		theAlarm = key
+	}
+	return theAlarm
+}
+
+func alarm(alarm string) {
+	f, err := os.Open(alarm)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -58,7 +103,7 @@ func createTimer(timerDuration time.Duration, action func()) *time.Timer {
 	return timer
 }
 
-func workTimer(timerDuration time.Duration) {
+func workTimer(timerDuration time.Duration, alarmChoice string) {
 	timer := createTimer(timerDuration, func() {
 	})
 
@@ -66,57 +111,29 @@ func workTimer(timerDuration time.Duration) {
 		select {
 		case <-timer.C:
 		default:
-			alarm()
+			alarm(alarmChoice)
 			fmt.Println("Take a break! Start your break timer.")
-			// newDuration := 5 * time.Second
-			// breakTimer(newDuration)
 		}
 	}()
 	<-timer.C
 
 }
 
-func breakTimer(timerDuration time.Duration) {
+func breakTimer(timerDuration time.Duration, alarmChoice string) {
 	timer := createTimer(timerDuration, func() {
 	})
 
 	defer func() {
-		timer.Stop()
 		select {
 		case <-timer.C:
 		default:
-			alarm()
-			fmt.Println("Break over! start work timer!")
+			alarm(alarmChoice)
+			fmt.Println("Break is over! start your work timer")
 		}
 	}()
 	<-timer.C
+
 }
-
-// Future implementation ?
-// func testingTicker() {
-// 	ticker := time.NewTicker(5 * time.Second)
-// 	ticker2 := time.NewTicker(30 * time.Second)
-// 	done := make(chan bool)
-
-// 	go func() {
-// 		for {
-// 			select {
-// 			case <-done:
-// 				return
-// 			case t := <-ticker.C:
-// 				fmt.Println("Tick at", t)
-// 				alarm()
-// 			case t2 := <-ticker2.C:
-// 				fmt.Println("Ticker 2", t2)
-// 			}
-// 		}
-// 	}()
-
-// 	time.Sleep(1 * time.Hour)
-// 	ticker.Stop()
-// 	done <- true
-// 	fmt.Println("Ticker stopped")
-// }
 
 func showTimeLeft(timerDuration time.Duration) {
 	// not currently implemented
