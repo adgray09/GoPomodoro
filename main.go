@@ -24,7 +24,7 @@ func flagHandler() {
 	var userAlarm string
 
 	flag.StringVar(&userAlarm, "alarm", "alarm1", "Choices: alarm1, alarm2")
-	timerDuration := flag.Duration("work", 25*time.Minute, "Work duration - default: 25 minutes")
+	workDuration := flag.Duration("work", 25*time.Minute, "Work duration - default: 25 minutes")
 	breakDuration := flag.Duration("break", 5*time.Minute, "Break duration - default: 5 minutes")
 	flag.Parse()
 
@@ -35,13 +35,14 @@ func flagHandler() {
 
 	if firstFlag.isUsed {
 		fmt.Println("Starting work")
-		workTimer(*timerDuration, userAlarm)
+		workTimer(*workDuration, userAlarm)
 	}
 
 	if secondFlag.isUsed {
 		fmt.Println("Starting break")
 		breakTimer(*breakDuration, userAlarm)
 	}
+
 }
 
 func isFlagPassed(name string) bool {
@@ -127,6 +128,7 @@ func breakTimer(timerDuration time.Duration, alarmChoice string) {
 		select {
 		case <-timer.C:
 		default:
+			// showTimeLeft(timerDuration)
 			alarm(alarmChoice)
 			fmt.Println("Break is over! start your work timer")
 		}
@@ -138,7 +140,8 @@ func breakTimer(timerDuration time.Duration, alarmChoice string) {
 func showTimeLeft(timerDuration time.Duration) {
 	// not currently implemented
 	now := time.Now()
-	end := now.Add(timerDuration)
+	end := now.Add(timerDuration + (2 * time.Second))
+	// fmt.Println(end)
 
 	for range time.Tick(1 * time.Second) {
 		newNow := time.Now()
@@ -150,6 +153,10 @@ func showTimeLeft(timerDuration time.Duration) {
 		minutes := int(total/60) % 60
 		seconds := int(total % 60)
 
-		fmt.Println(minutes, seconds)
+		if seconds == 0 {
+			break
+		}
+
+		fmt.Printf("M: %#v, S: %#v", minutes, seconds)
 	}
 }
