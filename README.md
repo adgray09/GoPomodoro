@@ -5,9 +5,14 @@
 Cli Application built for using the <a href="https://en.wikipedia.org/wiki/Pomodoro_Technique">Pomodoro Technique</a>
 
 ## 📚 Table of Contents
-1. [Current Flags](#current-flags)
-2. [Future Deliverables](#future-deliverables)
-3. [Resources](#resources)
+1. [Demo](#demo) 
+2. [Current Flags](#current-flags)
+3. [Future Deliverables](#future-deliverables)
+4. [Resources](#resources)
+
+# Demo 
+
+Check out my video demo <a href="https://share.vidyard.com/watch/NSg1J9ipgV11QiyFi37kWG?">here</a>
 
 ## Current Flags
 
